@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrenador de Números en Ruso (1-20)</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f5ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .range-selector {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        .range-btn {
+            background-color: #f2f2f2;
+            color: #333;
+            border: 1px solid #ddd;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .range-btn.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        .number-display {
+            font-size: 80px;
+            height: 180px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            border-radius: 10px;
+            background-color: #e8f4f8;
+            color: #2980b9;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 10px 0;
+            width: 80%;
+            max-width: 250px;
+            transition: background-color 0.2s;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .audio-btn {
+            background-color: #27ae60;
+        }
+        .audio-btn:hover {
+            background-color: #219653;
+        }
+        .translation-btn {
+            background-color: #e74c3c;
+        }
+        .translation-btn:hover {
+            background-color: #c0392b;
+        }
+        .info {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            width: 100%;
+        }
+        .info h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            text-align: center;
+        }
+        .pronunciation {
+            font-size: 18px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        .settings {
+            width: 100%;
+            margin-top: 20px;
+        }
+        .settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .settings-row label {
+            margin-right: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .reference-toggle {
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        .reference-toggle:hover {
+            background-color: #e67e22;
+        }
+        .reference-table {
+            display: none;
+            margin-top: 20px;
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Entrenador de Números en Ruso (1-20)</h1>
+    <div class="container">
+        <div class="range-selector">
+            <button id="range-1-10" class="range-btn active">1-10</button>
+            <button id="range-11-20" class="range-btn">11-20</button>
+            <button id="range-all" class="range-btn">Todos</button>
+        </div>
+
+        <div class="number-display" id="number-display">1</div>
+
+        <div class="controls">
+            <button id="next-number" class="btn">Siguiente número</button>
+            <button id="play-sound" class="btn audio-btn">Escuchar pronunciación</button>
+            <button id="show-translation" class="btn translation-btn">Mostrar en letras</button>
+        </div>
+
+        <div class="info">
+            <h3 id="number-in-russian">один (odin)</h3>
+            <p class="pronunciation" id="pronunciation-guide">Pronunciación: oh-DEEN</p>
+        </div>
+
+        <button id="toggle-reference" class="reference-toggle">Mostrar tabla de referencia</button>
+
+        <div id="reference-table" class="reference-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>En ruso</th>
+                        <th>Pronunciación</th>
+                    </tr>
+                </thead>
+                <tbody id="reference-body">
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="settings">
+            <div class="settings-row">
+                <label for="auto-play">Reproducir sonido automáticamente:</label>
+                <input type="checkbox" id="auto-play">
+            </div>
+            <div class="settings-row">
+                <label for="auto-change">Cambiar número automáticamente (seg):</label>
+                <input type="number" id="auto-change" min="0" max="30" step="1" value="0">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos de los números en ruso (1-20)
+        const russianNumbersData = [
+            { number: 1, inRussian: "один", latinized: "odin", pronunciation: "oh-DEEN" },
+            { number: 2, inRussian: "два", latinized: "dva", pronunciation: "dvah" },
+            { number: 3, inRussian: "три", latinized: "tri", pronunciation: "tree" },
+            { number: 4, inRussian: "четыре", latinized: "chetyre", pronunciation: "chee-TIH-ree" },
+            { number: 5, inRussian: "пять", latinized: "pyat", pronunciation: "pyat" },
+            { number: 6, inRussian: "шесть", latinized: "shest", pronunciation: "shest" },
+            { number: 7, inRussian: "семь", latinized: "sem", pronunciation: "syem" },
+            { number: 8, inRussian: "восемь", latinized: "vosem", pronunciation: "VOH-syem" },
+            { number: 9, inRussian: "девять", latinized: "devyat", pronunciation: "DYEH-vyat" },
+            { number: 10, inRussian: "десять", latinized: "desyat", pronunciation: "DYEH-syat" },
+            { number: 11, inRussian: "одиннадцать", latinized: "odinnadtsat", pronunciation: "ah-DEEN-nad-tsat" },
+            { number: 12, inRussian: "двенадцать", latinized: "dvenadtsat", pronunciation: "dveh-NAD-tsat" },
+            { number: 13, inRussian: "тринадцать", latinized: "trinadtsat", pronunciation: "tree-NAD-tsat" },
+            { number: 14, inRussian: "четырнадцать", latinized: "chetyrnadtsat", pronunciation: "chee-TIR-nad-tsat" },
+            { number: 15, inRussian: "пятнадцать", latinized: "pyatnadtsat", pronunciation: "pyet-NAD-tsat" },
+            { number: 16, inRussian: "шестнадцать", latinized: "shestnadtsat", pronunciation: "shest-NAD-tsat" },
+            { number: 17, inRussian: "семнадцать", latinized: "semnadtsat", pronunciation: "syem-NAD-tsat" },
+            { number: 18, inRussian: "восемнадцать", latinized: "vosemnadtsat", pronunciation: "vuh-seem-NAD-tsat" },
+            { number: 19, inRussian: "девятнадцать", latinized: "devyatnadtsat", pronunciation: "dee-vyet-NAD-tsat" },
+            { number: 20, inRussian: "двадцать", latinized: "dvadtsat", pronunciation: "DVAD-tsat" }
+        ];
+
+        // Variables globales
+        let currentNumber;
+        let autoChangeTimer = null;
+        let isTranslationVisible = true;
+        let currentRange = '1-10';
+        let filteredNumbers = getNumbersByRange(currentRange);
+
+        // Elementos DOM
+        const range1to10Button = document.getElementById('range-1-10');
+        const range11to20Button = document.getElementById('range-11-20');
+        const rangeAllButton = document.getElementById('range-all');
+        const numberDisplay = document.getElementById('number-display');
+        const numberInRussian = document.getElementById('number-in-russian');
+        const pronunciationGuide = document.getElementById('pronunciation-guide');
+        const nextButton = document.getElementById('next-number');
+        const playButton = document.getElementById('play-sound');
+        const showTranslationButton = document.getElementById('show-translation');
+        const autoPlayCheckbox = document.getElementById('auto-play');
+        const autoChangeInput = document.getElementById('auto-change');
+        const toggleReferenceButton = document.getElementById('toggle-reference');
+        const referenceTable = document.getElementById('reference-table');
+        const referenceBody = document.getElementById('reference-body');
+
+        // Función para obtener números por rango
+        function getNumbersByRange(range) {
+            switch (range) {
+                case '1-10':
+                    return russianNumbersData.slice(0, 10);
+                case '11-20':
+                    return russianNumbersData.slice(10, 20);
+                case 'all':
+                    return russianNumbersData;
+                default:
+                    return russianNumbersData.slice(0, 10);
+            }
+        }
+
+        // Función para obtener un número aleatorio del rango actual
+        function getRandomNumber() {
+            const randomIndex = Math.floor(Math.random() * filteredNumbers.length);
+            return filteredNumbers[randomIndex];
+        }
+
+        // Actualizar la visualización del número
+        function updateNumberDisplay(numberData) {
+            numberDisplay.textContent = numberData.number;
+            updateTranslation(numberData);
+
+            // Si el auto-play está activado, reproducir sonido
+            if (autoPlayCheckbox.checked) {
+                playSound(numberData);
+            }
+        }
+
+        // Actualizar la traducción
+        function updateTranslation(numberData) {
+            if (isTranslationVisible) {
+                numberInRussian.textContent = `${numberData.inRussian} (${numberData.latinized})`;
+                pronunciationGuide.textContent = `Pronunciación: ${numberData.pronunciation}`;
+            } else {
+                numberInRussian.textContent = '?????';
+                pronunciationGuide.textContent = 'Pronunciación: ?????';
+            }
+        }
+
+        // Alternar la visibilidad de la traducción
+        function toggleTranslation() {
+            isTranslationVisible = !isTranslationVisible;
+            updateTranslation(currentNumber);
+
+            if (isTranslationVisible) {
+                showTranslationButton.textContent = 'Ocultar traducción';
+            } else {
+                showTranslationButton.textContent = 'Mostrar traducción';
+            }
+        }
+
+        // Función para reproducir sonido
+        function playSound(numberData) {
+            const utterance = new SpeechSynthesisUtterance(numberData.inRussian);
+            utterance.lang = 'ru-RU';
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Mostrar un nuevo número aleatorio
+        function showNewNumber() {
+            currentNumber = getRandomNumber();
+            updateNumberDisplay(currentNumber);
+        }
+
+        // Configurar el cambio automático
+        function setupAutoChange() {
+            clearTimeout(autoChangeTimer);
+
+            const seconds = parseInt(autoChangeInput.value);
+            if (seconds > 0) {
+                autoChangeTimer = setInterval(showNewNumber, seconds * 1000);
+            }
+        }
+
+        // Cambiar el rango de práctica
+        function changeRange(range) {
+            currentRange = range;
+            filteredNumbers = getNumbersByRange(range);
+
+            // Actualizar clases activas de los botones de rango
+            range1to10Button.classList.remove('active');
+            range11to20Button.classList.remove('active');
+            rangeAllButton.classList.remove('active');
+
+            if (range === '1-10') {
+                range1to10Button.classList.add('active');
+            } else if (range === '11-20') {
+                range11to20Button.classList.add('active');
+            } else if (range === 'all') {
+                rangeAllButton.classList.add('active');
+            }
+
+            showNewNumber();
+        }
+
+        // Llenar la tabla de referencia
+        function fillReferenceTable() {
+            referenceBody.innerHTML = '';
+
+            russianNumbersData.forEach(num => {
+                const row = document.createElement('tr');
+
+                const numberCell = document.createElement('td');
+                numberCell.textContent = num.number;
+
+                const russianCell = document.createElement('td');
+                russianCell.textContent = num.inRussian;
+
+                const pronunciationCell = document.createElement('td');
+                pronunciationCell.textContent = `${num.latinized} (${num.pronunciation})`;
+
+                row.appendChild(numberCell);
+                row.appendChild(russianCell);
+                row.appendChild(pronunciationCell);
+
+                referenceBody.appendChild(row);
+            });
+        }
+
+        // Alternar la visibilidad de la tabla de referencia
+        function toggleReferenceTable() {
+            if (referenceTable.style.display === 'block') {
+                referenceTable.style.display = 'none';
+                toggleReferenceButton.textContent = 'Mostrar tabla de referencia';
+            } else {
+                referenceTable.style.display = 'block';
+                toggleReferenceButton.textContent = 'Ocultar tabla de referencia';
+            }
+        }
+
+        // Event listeners
+        range1to10Button.addEventListener('click', () => changeRange('1-1
